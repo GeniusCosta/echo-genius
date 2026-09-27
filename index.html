@@ -4584,5 +4584,61 @@ const PACS=(function(){
   if(!cfg.nome) setTimeout(()=>toast('Configure o médico laudador e o logo em ⚙ Médico / Logo'),800);
 })();
 </script>
+
+<!-- ====================== AJUDA: guia rápido para os médicos (botão ❓ Ajuda) ====================== -->
+<style>
+  .help-body{padding:14px 18px;overflow-y:auto;font-size:13px;line-height:1.5}
+  .help-body h4{font-size:11.5px;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin:14px 0 6px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+  .help-body h4:first-child{margin-top:0}
+  .help-body ol,.help-body ul{padding-left:20px}
+  .help-body li{margin-bottom:4px}
+  .help-body b{color:var(--ink)}
+  .help-body kbd{background:var(--panel2);border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:11.5px;font-family:ui-monospace,monospace}
+  .help-body .warn-box{background:var(--warn-bg);border:1px solid #5a2a2a;border-radius:6px;padding:8px 12px}
+</style>
+<script>
+(function(){
+  const hb=document.createElement('button');
+  hb.id='helpOpen'; hb.textContent='❓ Ajuda'; hb.title='Guia rápido de uso (F1)';
+  $('btnPasta').parentNode.insertBefore(hb,$('btnPasta'));
+  document.body.insertAdjacentHTML('beforeend',`
+<div id="helpModal" class="modal" style="display:none">
+  <div class="modal-bg" data-help-close></div>
+  <div class="modal-box" style="width:620px">
+    <div class="modal-h"><h3>Echo Genius · Guia rápido</h3><button class="modal-x" data-help-close>×</button></div>
+    <div class="help-body">
+      <h4>Primeira vez: configure seus dados</h4>
+      <p>Clique em <b>⚙ Médico / Logo</b> e preencha logo da clínica (JPEG ou PNG), nome, CRM, especialidades/RQE (uma por linha), cidade e, se quiser, a assinatura digitalizada. Clique em <b>Salvar</b>: fica gravado neste computador.</p>
+      <h4>Fazendo o laudo</h4>
+      <ol>
+        <li><b>Novo</b> limpa o laudo anterior.</li>
+        <li><b>Identificação:</b> nome, idade, <b>sexo</b> (obrigatório, porque muda as referências), peso e altura.</li>
+        <li><b>Medidas:</b> digite ou clique em <b>PACS</b> para importar do aparelho.<br>👶 Criança: clique em <b>Pediátrico</b> <u>antes</u> de importar.</li>
+        <li><b>Descrição:</b> marque os achados nos botões. O texto se monta sozinho e pode ser editado.</li>
+        <li><b>Conclusão:</b> gerada automaticamente; edite se precisar.</li>
+        <li><b>PDF</b> ou <b>Imprimir</b>. <b>Salvar</b> guarda o paciente no <b>Banco</b>.</li>
+      </ol>
+      <h4>Atalhos</h4>
+      <p><kbd>Ctrl+N</kbd> novo · <kbd>Ctrl+I</kbd> PACS · <kbd>Ctrl+S</kbd> salvar · <kbd>Ctrl+Shift+S</kbd> PDF · <kbd>Ctrl+P</kbd> imprimir · <kbd>Ctrl+L</kbd> banco · <kbd>F1</kbd> esta ajuda</p>
+      <h4>Importante</h4>
+      <div class="warn-box"><ul>
+        <li><b>Revise sempre</b> os valores importados e os textos automáticos antes de liberar o laudo.</li>
+        <li>Seus dados e os pacientes ficam <b>só neste navegador</b>: nada vai para a internet.</li>
+        <li>Computador compartilhado? Cada médico deve usar o <b>próprio perfil</b> do Chrome/Edge; senão um sobrescreve a configuração do outro.</li>
+        <li>Limpar os dados do navegador apaga a configuração e o Banco.</li>
+      </ul></div>
+    </div>
+  </div>
+</div>`);
+  const openH=()=>{ $('helpModal').style.display='flex'; };
+  const closeH=()=>{ $('helpModal').style.display='none'; };
+  hb.onclick=openH;
+  document.querySelectorAll('[data-help-close]').forEach(x=>x.onclick=closeH);
+  document.addEventListener('keydown',e=>{
+    if(e.key==='F1'){ e.preventDefault(); openH(); }
+    else if(e.key==='Escape' && $('helpModal').style.display!=='none') closeH();
+  });
+})();
+</script>
 </body>
 </html>

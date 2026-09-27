@@ -27,12 +27,29 @@ Clique em **⚙ Médico / Logo** na barra superior:
 - **Assinatura:** o ideal é um PNG com fundo transparente. Um JPEG com fundo branco também funciona, porque o branco é removido automaticamente.
 - **Onde fica salvo:** as configurações ficam **no próprio navegador**. Em outro computador ou navegador, é preciso configurar de novo.
 
-## Como usar
+## Guia rápido
 
-1. Abra o endereço acima no **Google Chrome** ou no **Microsoft Edge**.
-2. Na primeira vez, configure em **⚙ Médico / Logo**.
-3. Preencha a identificação e as medidas, ou importe do aparelho pelo botão **PACS**.
-4. Revise a descrição e a conclusão e gere o **PDF** ou **Imprima**.
+> Este guia também está dentro do programa: botão **❓ Ajuda** na barra superior (ou tecla **F1**).
+
+**Acesso:** https://geniuscosta.github.io/echo-genius/, no **Google Chrome** ou no **Microsoft Edge**.
+
+**Primeira vez: configure seus dados.** Clique em **⚙ Médico / Logo** e preencha logo da clínica (JPEG ou PNG), nome, CRM, especialidades/RQE (uma por linha), cidade e, se quiser, a assinatura digitalizada. Clique em **Salvar**: fica gravado neste computador.
+
+**Fazendo o laudo**
+1. **Novo** limpa o laudo anterior.
+2. **Identificação:** nome, idade, **sexo** (obrigatório, porque muda as referências), peso e altura.
+3. **Medidas:** digite ou clique em **PACS** para importar do aparelho. Para criança, clique em **Pediátrico** *antes* de importar.
+4. **Descrição:** marque os achados nos botões. O texto se monta sozinho e pode ser editado.
+5. **Conclusão:** gerada automaticamente; edite se precisar.
+6. **PDF** ou **Imprimir**. **Salvar** guarda o paciente no **Banco**.
+
+**Atalhos:** `Ctrl+N` novo · `Ctrl+I` PACS · `Ctrl+S` salvar · `Ctrl+Shift+S` PDF · `Ctrl+P` imprimir · `Ctrl+L` banco · `F1` ajuda
+
+**Importante**
+- **Revise sempre** os valores importados e os textos automáticos antes de liberar o laudo.
+- Seus dados e os pacientes ficam **só no seu navegador**: nada vai para a internet.
+- **Computador compartilhado:** cada médico deve usar o **próprio perfil** do Chrome ou do Edge. Senão, um sobrescreve a configuração do outro.
+- **Limpar os dados do navegador** apaga a configuração e o Banco.
 
 Também funciona abrindo o `index.html` direto do computador. O botão "Pasta…", que salva os PDFs numa pasta, funciona melhor no Edge.
 
