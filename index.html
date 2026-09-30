@@ -3674,6 +3674,8 @@ function fitTeePage(){
   #btnPACS{border-color:#1f5fa8}
   #btnPACS.set{background:#1f5fa8;color:#fff}
   input.pacs-fill{outline:2px solid #3fb6a8;outline-offset:1px}
+  /* laudo impresso/PDF: valor fora da referência SEM vermelho (o destaque fica só no editor) */
+  .a4 .meas-grid .ab{color:inherit}
   .pacs-sum{padding:10px 14px;font-size:12.5px}
   .pacs-sum table{width:100%;border-collapse:collapse;margin:6px 0 10px}
   .pacs-sum td{padding:3px 6px;border-bottom:1px solid var(--line)}
@@ -3846,11 +3848,11 @@ const PACS=(function(){
     ['_RVESA','Área sistólica do VD','area',[],/\bRV\s*ESA\b|\bRVESA\b|\bRV\s*Area\s*s\b|\bRVAs\b|right ventric\w*.*(end[- ]?)?systolic area/i,/index|\/\s*BSA/i,[1,60]],
     ['AoAnn','Anel aórtico','len',['17996-9'],/\bAo(rtic)?\s*(valve\s*)?ann(ulus|ular)?\b|\bAV\s*ann/i,/vel|area|VTI|grad/i,[6,45]],
     ['AoStj','Junção sinotubular','len',['17995-1'],/sino-?tubular|\bST\s*junc|\bSTJ\b/i,/index|\/\s*BSA/i,[6,65]],
-    ['AoAsc','Aorta ascendente','len',['18012-4'],/\basc(ending)?\.?\s*ao|\bao(rta)?\s*asc|ascending aorta|aorta ascendente/i,/index|\/\s*BSA/i,[8,90]],
+    ['AoAsc','Aorta ascendente','len',['18012-4'],/\basc(ending)?\.?\s*ao|\bao(rta)?\s*asc|ascending aorta|aorta ascendente/i,/index|\/\s*BSA|desc/i,[8,90]],
     ['AoArchD','Arco transverso distal','len',[],/distal (transverse )?arch|arch\s*dist|transverse arch/i,null,[2,60]],
     ['AoIsthmus','Istmo aórtico','len',[],/isthmus/i,null,[2,60]],
     ['AoArco','Arco aórtico','len',['18011-6'],/\bao(rtic)?\s*arch|\barch\b/i,/vel|grad/i,[6,60]],
-    ['AoRaiz','Raiz da aorta','len',['18015-7'],/\bao(rtic)?\s*root|sinus(es)? of valsalva|\bao\s*sinus|\bAoD\b|\bAo\s*(diam|dimension)\b|raiz (da )?ao(rta)?/i,/index|\/\s*BSA|ratio|LA\s*\/|\/\s*LA/i,[8,85]],
+    ['AoRaiz','Raiz da aorta','len',['18015-7'],/\bao(rtic)?\s*root|sinus(es)? of valsalva|\bao\s*sinus|\bAoD\b|\bAoR\b|\bAo\s*(diam|dimension)\b|raiz (da )?ao(rta)?/i,/index|\/\s*BSA|ratio|LA\s*\/|\/\s*LA|desc|thorac|abdom/i,[8,85]],
     ['Sprime','Onda S′ tricúspide','vel',[],/(\bRV|\bTV|tric\w*)\W{0,3}(free wall\s*|lat\w*\s*|ann\w*\s*)?S\s*['’′`´ˋ‘ʹ]|\bS\s*['’′`´ˋ‘ʹ]\s*(vel\w*\s*)?\(?\s*(RV|TV|tric)|\bRV\s*S\s*(vel|wave|peak)|\bRV\s*Sm\b|tricuspid annul\w*.*systolic/i,/E\s*['’′`´ˋ‘ʹ]|a['’′`´ˋ‘ʹ]|\/|ratio|VTI|mitral|\bMV\b|\bLV\b/i,[2,30]],
     ['Elat','E′ lateral','vel',[],/\blat\w*\.?\s*E\W{0,2}\s*vel|(e['’′`´ˋ‘ʹ]|e\s*prime|\bEa\b|\bEm\b|early diastolic tissue).*lat|lat.*(e['’′`´ˋ‘ʹ]|e\s*prime|\bEa\b|\bEm\b)/i,/E\s*\/\s*e|\/|ratio|a['’′`´ˋ‘ʹ]|s['’′`´ˋ‘ʹ]/i,[1,35]],
     ['Esep','E′ septal','vel',[],/\b(sept|med)\w*\.?\s*E\W{0,2}\s*vel|(e['’′`´ˋ‘ʹ]|e\s*prime|\bEa\b|\bEm\b|early diastolic tissue).*(sept|medial)|(sept|medial).*(e['’′`´ˋ‘ʹ]|e\s*prime|\bEa\b|\bEm\b)/i,/E\s*\/\s*e|\/|ratio|a['’′`´ˋ‘ʹ]|s['’′`´ˋ‘ʹ]/i,[1,35]],
@@ -3888,6 +3890,8 @@ const PACS=(function(){
     if(/user chosen|selected|chosen value/i.test(key)) s=3;
     else if(/mean|average/i.test(key)) s=2;
     if(/bi-?plane|\bBP\b/i.test(key)) s+=0.5;
+    if(/\bprox/i.test(key)) s-=0.5;        // "Prox ascAo Diam": usado só se não houver "Asc Ao Diam"
+    if(/\bAoR\b/.test(key)) s-=0.25;      // "AoR Diam": usado só se não houver "Ao Sinus Diam"
     return s;
   }
   /* Mapeia as medidas achatadas para os campos do laudo */
@@ -4007,17 +4011,34 @@ const PACS=(function(){
     };
   }
   const GENERIC=/^(vel|velocity|pg|peak|mean|max|vmax|vti|value|valor|avg|m[eé]dia|vol|volume|diam|dist|area|length)$/i;
+  /* O pdf.js separa colunas com 3+ espaços. Cada linha vira "células" (rótulo + valor);
+     um título sem valor ("MV Peak E Vel") vale para as próximas 3 linhas DA MESMA COLUNA,
+     onde rótulos genéricos ("Vel", "PG", "Vol") ou valores soltos ("62.6 cm/s") herdam o nome. */
+  const TTL_TITULO=3;
   function parsePdf(lines){
-    const meas=[]; let ctx='';
+    const meas=[], tit={};   // tit[coluna] = {t:título, age:linhas desde o título}
     for(const ln of lines){
-      const first=ln.trim().split(/\s+/)[0]||'';
-      const ms=lineMeas(ctx && /^[-−]?\d/.test(first) ? ctx+' '+ln : ln);   // linha começa pelo valor → nome está na linha anterior
-      if(!ms.length){ const t=ln.trim(); if(t && t.length<=40 && !t.split(/\s+/).some(w=>NUM_RE.test(w)) && !/:/.test(t)) ctx=t; continue; }
-      let prev=null;
-      ms.forEach(m=>{ if(PAT_RE.test(m.name)) return;
-        if(m.name.split(/\s+/).every(w=>GENERIC.test(w))){ const base=prev||ctx; if(base) m.name=base+' '+m.name; }   // "Vel" → "MV Peak E Vel Vel"
-        else prev=m.name;
-        meas.push({name:m.name,code:'',scheme:'PDF',value:m.value,unit:m.unit.replace('²','2'),unitM:m.unit,mods:[],ctx:[]}); });
+      const cells=[];
+      ln.trim().split(/\s{3,}/).forEach(seg=>{
+        if(!seg) return;
+        if(cells.length && /^[-−]?\d/.test(seg)) cells[cells.length-1]+=' '+seg;   // valor pertence ao rótulo à esquerda
+        else cells.push(seg);
+      });
+      Object.keys(tit).forEach(k=>{ if(++tit[k].age>TTL_TITULO) delete tit[k]; });
+      let rowTit=null;
+      cells.forEach((cell,ci)=>{
+        const base=()=> (tit[ci]&&tit[ci].t) || rowTit;
+        const ms=lineMeas(/^[-−]?\d/.test(cell) && base() ? base()+' '+cell : cell);   // célula que começa pelo valor
+        if(!ms.length){
+          if(cell.length<=40 && !cell.split(/\s+/).some(w=>NUM_RE.test(w)) && !/:/.test(cell)){ tit[ci]={t:cell,age:0}; rowTit=cell; }
+          return;
+        }
+        let prev=null;
+        ms.forEach(m=>{ if(PAT_RE.test(m.name)) return;
+          if(m.name.split(/\s+/).every(w=>GENERIC.test(w))){ const b=prev||base(); if(b) m.name=b+' '+m.name; }   // "Vel" → "MV Peak E Vel Vel"
+          else prev=m.name;
+          meas.push({name:m.name,code:'',scheme:'PDF',value:m.value,unit:m.unit.replace('²','2'),unitM:m.unit,mods:[],ctx:[]}); });
+      });
     }
     return {meas,p:pdfPatient(lines.join('\n'))};
   }
